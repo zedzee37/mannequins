@@ -6,6 +6,8 @@
   "mixins": [
   ],
   "client": [
+    "client.LayerDefinitionsMixin",
+    "client.SkullBlockRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,0 +1,3 @@
+/summon mannequins:mannequin
+/give @s
+/give @s mannequins:villager_skull
