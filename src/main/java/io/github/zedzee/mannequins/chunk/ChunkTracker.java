@@ -5,11 +5,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import io.github.zedzee.mannequins.Mannequins;
 import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
@@ -38,21 +40,26 @@ public class ChunkTracker extends SavedData {
         this.forceLoadedChunks =forceLoadedChunks;
     }
 
-    public void forceChunk(ChunkPos pos) {
+    public void forceChunk(ServerLevel level, BlockPos owner, ChunkPos pos) {
         int count = forceLoadedChunks.getOrDefault(pos, 0);
         forceLoadedChunks.put(pos, ++count);
+
+        Mannequins.TICKET_CONTROLLER.forceChunk(level, owner, pos.x, pos.z, true, true);
+
         setDirty();
     }
 
-    public void unForceChunk(ChunkPos pos) {
+    public void unForceChunk(ServerLevel level, BlockPos owner, ChunkPos pos) {
         if (!forceLoadedChunks.containsKey(pos)) {
             return;
         }
+
         int count = forceLoadedChunks.getOrDefault(pos, 1);
         count--;
 
         if (count <= 0) {
             forceLoadedChunks.remove(pos);
+            Mannequins.TICKET_CONTROLLER.forceChunk(level, owner, pos.x, pos.z, false, false);
         } else {
             forceLoadedChunks.put(pos, count);
         }
