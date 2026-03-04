@@ -21,9 +21,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
+import net.neoforged.neoforge.common.world.chunk.TicketController;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -32,7 +30,7 @@ import org.slf4j.Logger;
 @Mod(Mannequins.MODID)
 public class Mannequins {
     public static final String MODID = "mannequins";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
@@ -47,6 +45,7 @@ public class Mannequins {
     public static final SkullBlock.Type VILLAGER_SKULL_TYPE = new VillagerSkull.VillagerSkullType();
     public static final ModelLayerLocation VILLAGER_SKULL_LAYER =
             new ModelLayerLocation(resourceLocation("villager_head"), "main");
+    public static final TicketController TICKET_CONTROLLER = new TicketController(resourceLocation("ticket_controller"));
 
     public Mannequins(IEventBus modEventBus, ModContainer modContainer) {
         BLOCKS.register(modEventBus);
