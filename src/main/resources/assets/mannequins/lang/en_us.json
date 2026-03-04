@@ -1,5 +1,3 @@
 {
-  "itemGroup.mannequins": "Example Mod Tab",
-  "block.mannequins.example_block": "Example Block",
-  "item.mannequins.example_item": "Example Item"
+  "item.mannequins.villager_skull": "Villager Head"
 }

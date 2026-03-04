@@ -1,10 +1,8 @@
 package io.github.zedzee.mannequins.chunk;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import io.github.zedzee.mannequins.Mannequins;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -16,103 +14,87 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.*;
 
 public class ChunkTracker extends SavedData {
-    public Map<ChunkPos, Integer> forceLoadedChunks;
-    public static final Codec<ChunkPos> CHUNK_POS_CODEC = Codec.INT_STREAM.comapFlatMap(
-                            stream -> Util.fixedSize(stream, 2).map(i -> new ChunkPos(i[0], i[1])),
-                            chunkPos -> IntStream.of(chunkPos.x, chunkPos.z)
-                    );
+    public static final String LOADERS_KEY = "chunks";
+    public static final String DATA_STORAGE_KEY = "chunk_tracker";
+    public static final SavedData.Factory<ChunkTracker> FACTORY = new SavedData.Factory<>(
+            ChunkTracker::new,
+            ChunkTracker::load
+    );
 
-
-    public static final String CHUNKS_KEY = "chunks";
-    public static final String CHUNK_POS_KEY = "pos";
-    public static final String COUNT_KEY = "count";
+    private final Set<BlockPos> loaders;
 
     public ChunkTracker() {
-        this.forceLoadedChunks = new HashMap<>();
+        this.loaders = new HashSet<>();
     }
 
-    public ChunkTracker(Map<ChunkPos, Integer> forceLoadedChunks) {
-        this.forceLoadedChunks =forceLoadedChunks;
+    public ChunkTracker(Set<BlockPos> loaders) {
+        this.loaders = loaders;
     }
 
-    public void forceChunk(ServerLevel level, BlockPos owner, ChunkPos pos) {
-        int count = forceLoadedChunks.getOrDefault(pos, 0);
-        forceLoadedChunks.put(pos, ++count);
-
+    public void addLoader(ServerLevel level, BlockPos owner) {
+        ChunkPos pos = level.getChunk(owner).getPos();
+        loaders.add(owner);
         Mannequins.TICKET_CONTROLLER.forceChunk(level, owner, pos.x, pos.z, true, true);
-
         setDirty();
     }
 
-    public void unForceChunk(ServerLevel level, BlockPos owner, ChunkPos pos) {
-        if (!forceLoadedChunks.containsKey(pos)) {
+    public void removeLoader(ServerLevel level, BlockPos owner) {
+        if (!loaders.contains(owner)) {
             return;
         }
 
-        int count = forceLoadedChunks.getOrDefault(pos, 1);
-        count--;
-
-        if (count <= 0) {
-            forceLoadedChunks.remove(pos);
-            Mannequins.TICKET_CONTROLLER.forceChunk(level, owner, pos.x, pos.z, false, false);
-        } else {
-            forceLoadedChunks.put(pos, count);
-        }
-
+        ChunkPos pos = level.getChunk(owner).getPos();
+        loaders.remove(owner);
+        Mannequins.TICKET_CONTROLLER.forceChunk(level, owner, pos.x, pos.z, false, true);
         setDirty();
+    }
+
+    public static void forceChunks(ServerLevel level) {
+        ChunkTracker tracker = getFromLevel(level);
+        tracker.loaders.forEach(pos -> tracker.addLoader(level, pos));
     }
 
     @Override
     public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        ListTag tags = tag.getList(CHUNKS_KEY, Tag.TAG_COMPOUND);
+        ListTag tags = tag.getList(LOADERS_KEY, Tag.TAG_COMPOUND);
 
-        for (ChunkPos pos : forceLoadedChunks.keySet()) {
-            DataResult<Tag> chunkPosResult = CHUNK_POS_CODEC.encodeStart(NbtOps.INSTANCE, pos);
+        for (BlockPos pos : loaders) {
+            DataResult<Tag> blockPosResult = BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos);
 
-            if (chunkPosResult.isError()) {
-                Mannequins.LOGGER.error(chunkPosResult.error().get().message());
+            if (blockPosResult.isError()) {
+                Mannequins.LOGGER.error(blockPosResult.error().get().message());
                 return tag;
             }
 
-            CompoundTag compoundTag = new CompoundTag();
-
-            Tag chunkPosTag = chunkPosResult.getOrThrow();
-            compoundTag.put(CHUNK_POS_KEY, chunkPosTag);
-            compoundTag.putInt(COUNT_KEY, forceLoadedChunks.getOrDefault(pos, 0));
-
-            tags.add(compoundTag);
+            tags.add(blockPosResult.getOrThrow());
         }
         return tag;
     }
 
-    public static ChunkTracker load(CompoundTag tag) {
-        if (!tag.contains(CHUNKS_KEY)) {
+    public static ChunkTracker load(CompoundTag tag, HolderLookup.Provider provider) {
+        if (!tag.contains(LOADERS_KEY)) {
             return new ChunkTracker();
         }
 
-        ListTag listTag = tag.getList(CHUNKS_KEY, Tag.TAG_COMPOUND);
-        Map<ChunkPos, Integer> forcedChunks = new HashMap<>();
+        ListTag listTag = tag.getList(LOADERS_KEY, Tag.TAG_COMPOUND);
+        HashSet<BlockPos> loaders = new HashSet<>();
         for (Tag maybeCompound : listTag) {
-            if (!(maybeCompound instanceof CompoundTag compoundTag)) {
-                continue;
+            DataResult<Pair<BlockPos, Tag>> maybeBlockPos = BlockPos.CODEC.decode(NbtOps.INSTANCE, maybeCompound);
+
+            if (maybeBlockPos.isError()) {
+                Mannequins.LOGGER.error(maybeBlockPos.error().get().message());
             }
 
-            int count = compoundTag.getInt(COUNT_KEY);
-            DataResult<Pair<ChunkPos, Tag>> maybeChunkPos = CHUNK_POS_CODEC.decode(NbtOps.INSTANCE, compoundTag.get(CHUNK_POS_KEY));
-
-            if (maybeChunkPos.isError()) {
-                Mannequins.LOGGER.error(maybeChunkPos.error().get().message());
-            }
-
-            ChunkPos chunkPos = maybeChunkPos.getOrThrow().getFirst();
-            forcedChunks.put(chunkPos, count);
+            loaders.add(maybeBlockPos.getOrThrow().getFirst());
         }
 
-        return new ChunkTracker(forcedChunks);
+        return new ChunkTracker(loaders);
+    }
+
+    public static ChunkTracker getFromLevel(ServerLevel level) {
+        return level.getDataStorage().computeIfAbsent(FACTORY, DATA_STORAGE_KEY);
     }
 }

@@ -12,11 +12,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class VillagerSkullModel extends SkullModelBase {
     private final ModelPart head;
-    private final ModelPart nose;
 
     public VillagerSkullModel(ModelPart modelPart) {
         this.head = modelPart.getChild("head");
-        this.nose = head.getChild("nose");
     }
 
     public static MeshDefinition createHeadModel() {
