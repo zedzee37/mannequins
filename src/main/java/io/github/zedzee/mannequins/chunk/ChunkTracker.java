@@ -38,6 +38,28 @@ public class ChunkTracker extends SavedData {
         this.forceLoadedChunks =forceLoadedChunks;
     }
 
+    public void forceChunk(ChunkPos pos) {
+        int count = forceLoadedChunks.getOrDefault(pos, 0);
+        forceLoadedChunks.put(pos, ++count);
+        setDirty();
+    }
+
+    public void unForceChunk(ChunkPos pos) {
+        if (!forceLoadedChunks.containsKey(pos)) {
+            return;
+        }
+        int count = forceLoadedChunks.getOrDefault(pos, 1);
+        count--;
+
+        if (count <= 0) {
+            forceLoadedChunks.remove(pos);
+        } else {
+            forceLoadedChunks.put(pos, count);
+        }
+
+        setDirty();
+    }
+
     @Override
     public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
         ListTag tags = tag.getList(CHUNKS_KEY, Tag.TAG_COMPOUND);
