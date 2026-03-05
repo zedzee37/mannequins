@@ -1,13 +1,11 @@
 package io.github.zedzee.mannequins.chunk;
 
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
 import io.github.zedzee.mannequins.Mannequins;
+import io.github.zedzee.mannequins.block.VillagerSkull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -15,14 +13,19 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class ChunkTracker extends SavedData {
-    public static final String LOADERS_KEY = "chunks";
     public static final String DATA_STORAGE_KEY = "chunk_tracker";
     public static final SavedData.Factory<ChunkTracker> FACTORY = new SavedData.Factory<>(
             ChunkTracker::new,
             ChunkTracker::load
     );
+
+    private static final String LOADERS_KEY = "chunks";
+    private static final String X_KEY = "x";
+    private static final String Y_KEY = "y";
+    private static final String Z_KEY = "z";
 
     private final Set<BlockPos> loaders;
 
@@ -52,9 +55,33 @@ public class ChunkTracker extends SavedData {
         setDirty();
     }
 
+    public Set<BlockPos> getLoaders() {
+        return this.loaders;
+    }
+
     public static void forceChunks(ServerLevel level) {
         ChunkTracker tracker = getFromLevel(level);
         tracker.loaders.forEach(pos -> tracker.addLoader(level, pos));
+    }
+
+    public static boolean testLoaders(ServerLevel level, Predicate<BlockPos> comparison) {
+        ChunkTracker tracker = getFromLevel(level);
+
+        for (BlockPos loader : tracker.getLoaders()) {
+            if (!VillagerSkull.isPowered(level, loader)) {
+                continue;
+            }
+
+            if (comparison.test(loader)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean testLoaders(ServerLevel level, BlockPos pos, double maxDistance) {
+        return testLoaders(level, (loader) -> loader.distSqr(pos) < maxDistance);
     }
 
     @Override
@@ -62,15 +89,14 @@ public class ChunkTracker extends SavedData {
         ListTag tags = tag.getList(LOADERS_KEY, Tag.TAG_COMPOUND);
 
         for (BlockPos pos : loaders) {
-            DataResult<Tag> blockPosResult = BlockPos.CODEC.encodeStart(NbtOps.INSTANCE, pos);
-
-            if (blockPosResult.isError()) {
-                Mannequins.LOGGER.error(blockPosResult.error().get().message());
-                return tag;
-            }
-
-            tags.add(blockPosResult.getOrThrow());
+            CompoundTag compoundTag = new CompoundTag();
+            compoundTag.putInt(X_KEY, pos.getX());
+            compoundTag.putInt(Y_KEY, pos.getY());
+            compoundTag.putInt(Z_KEY, pos.getZ());
+            tags.add(compoundTag);
         }
+
+        tag.put(LOADERS_KEY, tags);
         return tag;
     }
 
@@ -82,13 +108,14 @@ public class ChunkTracker extends SavedData {
         ListTag listTag = tag.getList(LOADERS_KEY, Tag.TAG_COMPOUND);
         HashSet<BlockPos> loaders = new HashSet<>();
         for (Tag maybeCompound : listTag) {
-            DataResult<Pair<BlockPos, Tag>> maybeBlockPos = BlockPos.CODEC.decode(NbtOps.INSTANCE, maybeCompound);
-
-            if (maybeBlockPos.isError()) {
-                Mannequins.LOGGER.error(maybeBlockPos.error().get().message());
+            if (!(maybeCompound instanceof CompoundTag compoundTag)) {
+                continue;
             }
 
-            loaders.add(maybeBlockPos.getOrThrow().getFirst());
+            int x = compoundTag.getInt(X_KEY);
+            int y = compoundTag.getInt(Y_KEY);
+            int z = compoundTag.getInt(Z_KEY);
+            loaders.add(new BlockPos(x, y, z));
         }
 
         return new ChunkTracker(loaders);

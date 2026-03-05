@@ -42,6 +42,10 @@ public class VillagerSkull extends SkullBlock {
         tracker.removeLoader(serverLevel, pos);
     }
 
+    public static boolean isPowered(Level level, BlockPos pos) {
+        return level.hasNeighborSignal(pos) || level.getBestNeighborSignal(pos) > 0;
+    }
+
     public static class VillagerSkullType implements Type {
         @Override
         public @NotNull String getSerializedName() {

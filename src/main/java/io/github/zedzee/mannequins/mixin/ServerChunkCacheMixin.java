@@ -1,0 +1,86 @@
+package io.github.zedzee.mannequins.mixin;
+
+import com.llamalad7.mixinextras.sugar.Local;
+import io.github.zedzee.mannequins.chunk.ChunkTracker;
+import net.minecraft.core.SectionPos;
+import net.minecraft.server.level.*;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.NaturalSpawner;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import javax.annotation.Nullable;
+
+@Mixin(ServerChunkCache.class)
+public class ServerChunkCacheMixin {
+    @Final
+    @Unique
+    private static final double MAX_DISTANCE = 16384.0;
+
+    @Shadow
+    @Final
+    public ServerLevel level;
+
+    @Shadow
+    @Final
+    public ChunkMap chunkMap;
+
+    @Shadow
+    @Final
+    private DistanceManager distanceManager;
+
+    @Shadow
+    @Nullable
+    private NaturalSpawner.SpawnState lastSpawnState;
+
+    @Shadow
+    private boolean spawnFriendlies;
+
+    @Shadow
+    private boolean spawnEnemies;
+
+    @Inject(
+            method = "tickChunks",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/server/level/ServerLevel;isNaturalSpawningAllowed(Lnet/minecraft/world/level/ChunkPos;)Z")
+    )
+    public void chunkLoaderSpawn(
+            CallbackInfo ci,
+            @Local()LevelChunk levelChunk,
+            @Local()ChunkPos chunkPos,
+            @Local(ordinal = 1)boolean flag) {
+        boolean willVanillaSpawn = (
+                this.level.isNaturalSpawningAllowed(chunkPos) &&
+                this.chunkMap.anyPlayerCloseEnoughForSpawning(chunkPos)
+        ) || this.distanceManager.shouldForceTicks(chunkPos.toLong());
+
+        if (willVanillaSpawn) {
+            return;
+        }
+
+        int x = SectionPos.sectionToBlockCoord(chunkPos.x);
+        int y = SectionPos.sectionToBlockCoord(chunkPos.z);
+
+        if (ChunkTracker.testLoaders(level, (loader) -> {
+            int dx = loader.getX() - x;
+            int dy = loader.getY() - y;
+            int distanceSquared = (dx*dx) + (dy*dy);
+            return distanceSquared < MAX_DISTANCE;
+        }) && this.lastSpawnState != null) {
+            NaturalSpawner.spawnForChunk(
+                    level,
+                    levelChunk,
+                    this.lastSpawnState,
+                    this.spawnFriendlies,
+                    this.spawnEnemies,
+                    flag
+            );
+        }
+    }
+}

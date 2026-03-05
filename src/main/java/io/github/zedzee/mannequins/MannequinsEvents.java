@@ -1,14 +1,23 @@
 package io.github.zedzee.mannequins;
 
+import io.github.zedzee.mannequins.block.VillagerSkull;
 import io.github.zedzee.mannequins.chunk.ChunkTracker;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.entity.living.MobDespawnEvent;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
+
+import java.util.Set;
 
 @EventBusSubscriber(modid = Mannequins.MODID)
 public class MannequinsEvents {
@@ -33,5 +42,55 @@ public class MannequinsEvents {
         }
 
         ChunkTracker.forceChunks(serverLevel);
+    }
+
+    @SubscribeEvent
+    public static void onSpawnPositionCheck(MobSpawnEvent.PositionCheck event) {
+        ServerLevel serverLevel = event.getLevel().getLevel();
+
+        Entity entity = event.getEntity();
+        EntityType<?> entityType = entity.getType();
+        double despawnDistance = entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance();
+
+        ChunkTracker tracker = ChunkTracker.getFromLevel(serverLevel);
+        Set<BlockPos> loaders = tracker.getLoaders();
+        for (BlockPos loader : loaders) {
+            if (!VillagerSkull.isPowered(serverLevel, loader)) {
+                continue;
+            }
+
+            double distanceSquared = loader.distSqr(entity.getOnPos());
+            if (distanceSquared < despawnDistance) {
+                event.setResult(MobSpawnEvent.PositionCheck.Result.SUCCEED);
+                return;
+            }
+        }
+
+        event.setResult(MobSpawnEvent.PositionCheck.Result.DEFAULT);
+    }
+
+    @SubscribeEvent
+    public static void onTryDespawn(MobDespawnEvent event) {
+        ServerLevel serverLevel = event.getLevel().getLevel();
+
+        Entity entity = event.getEntity();
+        EntityType<?> entityType = entity.getType();
+        double despawnDistance = entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance();
+
+        ChunkTracker tracker = ChunkTracker.getFromLevel(serverLevel);
+        Set<BlockPos> loaders = tracker.getLoaders();
+        for (BlockPos loader : loaders) {
+            if (!VillagerSkull.isPowered(serverLevel, loader)) {
+                continue;
+            }
+
+            double distanceSquared = loader.distSqr(entity.getOnPos());
+            if (distanceSquared < despawnDistance) {
+                event.setResult(MobDespawnEvent.Result.DENY);
+                return;
+            }
+        }
+
+        event.setResult(MobDespawnEvent.Result.DEFAULT);
     }
 }
