@@ -1,6 +1,5 @@
 package io.github.zedzee.mannequins.mixin;
 
-import io.github.zedzee.mannequins.Mannequins;
 import io.github.zedzee.mannequins.block.VillagerSkull;
 import io.github.zedzee.mannequins.chunk.ChunkTracker;
 import net.minecraft.core.BlockPos;
@@ -49,7 +48,7 @@ public abstract class NaturalSpawnerMixin {
         }
 
         double despawnDistance = mob.getType().getCategory().getDespawnDistance();
-        return ChunkTracker.testLoaders(level, mob.getOnPos(), despawnDistance * despawnDistance);
+        return ChunkTracker.testPoweredLoaders(level, mob.getOnPos(), despawnDistance * despawnDistance);
     }
 
     @Inject(

@@ -67,7 +67,7 @@ public class ServerChunkCacheMixin {
         int x = SectionPos.sectionToBlockCoord(chunkPos.x);
         int y = SectionPos.sectionToBlockCoord(chunkPos.z);
 
-        if (ChunkTracker.testLoaders(level, (loader) -> {
+        if (ChunkTracker.testPoweredLoaders(level, (loader) -> {
             int dx = loader.getX() - x;
             int dy = loader.getY() - y;
             int distanceSquared = (dx*dx) + (dy*dy);

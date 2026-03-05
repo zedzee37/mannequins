@@ -64,7 +64,7 @@ public class ChunkTracker extends SavedData {
         tracker.loaders.forEach(pos -> tracker.addLoader(level, pos));
     }
 
-    public static boolean testLoaders(ServerLevel level, Predicate<BlockPos> comparison) {
+    public static boolean testPoweredLoaders(ServerLevel level, Predicate<BlockPos> comparison) {
         ChunkTracker tracker = getFromLevel(level);
 
         for (BlockPos loader : tracker.getLoaders()) {
@@ -80,8 +80,8 @@ public class ChunkTracker extends SavedData {
         return false;
     }
 
-    public static boolean testLoaders(ServerLevel level, BlockPos pos, double maxDistance) {
-        return testLoaders(level, (loader) -> loader.distSqr(pos) < maxDistance);
+    public static boolean testPoweredLoaders(ServerLevel level, BlockPos pos, double maxDistance) {
+        return testPoweredLoaders(level, (loader) -> loader.distSqr(pos) < maxDistance);
     }
 
     @Override

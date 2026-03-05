@@ -40,7 +40,7 @@ public class LocalMobCapCalculatorMixin {
         int x = SectionPos.sectionToBlockCoord(pos.x);
         int z = SectionPos.sectionToBlockCoord(pos.z);
 
-        if (ChunkTracker.testLoaders(chunkMap.level, (loader) -> {
+        if (ChunkTracker.testPoweredLoaders(chunkMap.level, (loader) -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
             int distance = dx*dx + dz*dz;
@@ -61,7 +61,7 @@ public class LocalMobCapCalculatorMixin {
         int x = SectionPos.sectionToBlockCoord(pos.x);
         int z = SectionPos.sectionToBlockCoord(pos.z);
 
-        ChunkTracker.testLoaders(chunkMap.level, loader -> {
+        ChunkTracker.testPoweredLoaders(chunkMap.level, loader -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
             int distance = dx*dx + dz*dz;
