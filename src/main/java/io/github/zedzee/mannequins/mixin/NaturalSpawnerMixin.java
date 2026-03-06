@@ -37,7 +37,7 @@ public abstract class NaturalSpawnerMixin {
         }
 
         double despawnDistance = mob.getType().getCategory().getDespawnDistance();
-        if (ChunkTracker.testPoweredLoaders(level, mob.blockPosition(), despawnDistance * despawnDistance)) {
+        if (ChunkTracker.loaderWithinDistance(level, mob.blockPosition(), despawnDistance * despawnDistance)) {
             return isValidPositionForMob(level, mob, 0);
         }
 
@@ -57,7 +57,7 @@ public abstract class NaturalSpawnerMixin {
                                     double distance) {
         boolean canSpawn = isValidSpawnPostitionForType(level, category, structureManager, generator, data, pos, distance);
         if (!canSpawn) {
-            if (ChunkTracker.testPoweredLoaders(
+            if (ChunkTracker.loaderWithinDistance(
                     level, pos, category.getDespawnDistance() * category.getDespawnDistance()
             )) {
                 return isValidSpawnPostitionForType(level, category, structureManager, generator, data, pos, 0);

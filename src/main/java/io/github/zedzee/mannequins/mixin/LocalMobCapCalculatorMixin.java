@@ -61,17 +61,16 @@ public class LocalMobCapCalculatorMixin {
         int x = SectionPos.sectionToBlockCoord(pos.x, 8);
         int z = SectionPos.sectionToBlockCoord(pos.z, 8);
 
-        ChunkTracker.testPoweredLoaders(chunkMap.level, loader -> {
+        ChunkTracker.forEachPoweredLoader(chunkMap.level, loader -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
             int distance = dx*dx + dz*dz;
 
             if (distance > SPAWNER_DISTANCE) {
-                return false;
+                return;
             }
 
             mannequins$loaderCountMap.computeIfAbsent(loader, l -> new LocalMobCapCalculator.MobCounts()).add(category);
-            return false;
         });
     }
 }

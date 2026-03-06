@@ -13,6 +13,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class ChunkTracker extends SavedData {
@@ -80,8 +81,16 @@ public class ChunkTracker extends SavedData {
         return false;
     }
 
-    public static boolean testPoweredLoaders(ServerLevel level, BlockPos pos, double maxDistance) {
+    public static boolean loaderWithinDistance(ServerLevel level, BlockPos pos, double maxDistance) {
         return testPoweredLoaders(level, (loader) -> loader.distSqr(pos) < maxDistance);
+    }
+
+    public static boolean forEachPoweredLoader(ServerLevel level, Consumer<BlockPos> consumer) {
+        for (BlockPos loader : getFromLevel(level).getLoaders()) {
+            if (VillagerSkull.isPowered(level, loader)) {
+                consumer.accept(loader);
+            }
+        }
     }
 
     @Override
