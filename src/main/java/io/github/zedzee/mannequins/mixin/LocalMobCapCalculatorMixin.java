@@ -70,7 +70,7 @@ public class LocalMobCapCalculatorMixin {
                 return false;
             }
 
-            mannequins$loaderCountMap.computeIfAbsent(loader, l -> new LocalMobCapCalculator.MobCounts());
+            mannequins$loaderCountMap.computeIfAbsent(loader, l -> new LocalMobCapCalculator.MobCounts()).add(category);
             return false;
         });
     }
