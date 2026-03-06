@@ -69,8 +69,8 @@ public abstract class ServerChunkCacheMixin {
             return;
         }
 
-        int x = SectionPos.sectionToBlockCoord(chunkPos.x);
-        int z = SectionPos.sectionToBlockCoord(chunkPos.z);
+        int x = SectionPos.sectionToBlockCoord(chunkPos.x, 8);
+        int z = SectionPos.sectionToBlockCoord(chunkPos.z, 8);
 
         int l = this.distanceManager.getNaturalSpawnChunkCount();
         NaturalSpawner.SpawnState state = NaturalSpawner.createState(
