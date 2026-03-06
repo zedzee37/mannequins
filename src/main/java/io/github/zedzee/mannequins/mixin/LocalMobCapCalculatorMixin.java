@@ -37,8 +37,8 @@ public class LocalMobCapCalculatorMixin {
             return;
         }
 
-        int x = SectionPos.sectionToBlockCoord(pos.x);
-        int z = SectionPos.sectionToBlockCoord(pos.z);
+        int x = SectionPos.sectionToBlockCoord(pos.x, 8);
+        int z = SectionPos.sectionToBlockCoord(pos.z, 8);
 
         if (ChunkTracker.testPoweredLoaders(chunkMap.level, (loader) -> {
             int dx = loader.getX() - x;
@@ -58,8 +58,8 @@ public class LocalMobCapCalculatorMixin {
 
     @Inject(method = "addMob", at = @At("RETURN"))
     public void addMobToLoaders(ChunkPos pos, MobCategory category, CallbackInfo ci) {
-        int x = SectionPos.sectionToBlockCoord(pos.x);
-        int z = SectionPos.sectionToBlockCoord(pos.z);
+        int x = SectionPos.sectionToBlockCoord(pos.x, 8);
+        int z = SectionPos.sectionToBlockCoord(pos.z, 8);
 
         ChunkTracker.testPoweredLoaders(chunkMap.level, loader -> {
             int dx = loader.getX() - x;
