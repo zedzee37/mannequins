@@ -5,6 +5,7 @@ import io.github.zedzee.mannequins.chunk.ChunkTracker;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.*;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LocalMobCapCalculator;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.asm.mixin.Final;
@@ -16,9 +17,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 @Mixin(ServerChunkCache.class)
-public class ServerChunkCacheMixin {
+public abstract class ServerChunkCacheMixin {
     @Final
     @Unique
     private static final double MAX_DISTANCE = 16384.0;
@@ -45,6 +47,9 @@ public class ServerChunkCacheMixin {
     @Shadow
     private boolean spawnEnemies;
 
+    @Shadow
+    protected abstract void getFullChunk(long chunkPos, Consumer<LevelChunk> fullChunkGetter);
+
     @Inject(
             method = "tickChunks",
             at = @At(value = "INVOKE",
@@ -67,6 +72,13 @@ public class ServerChunkCacheMixin {
         int x = SectionPos.sectionToBlockCoord(chunkPos.x);
         int z = SectionPos.sectionToBlockCoord(chunkPos.z);
 
+        int l = this.distanceManager.getNaturalSpawnChunkCount();
+        NaturalSpawner.SpawnState state = NaturalSpawner.createState(
+                l,
+                this.level.getAllEntities(),
+                this::getFullChunk,
+                new LocalMobCapCalculator(this.chunkMap)
+        );
         if (ChunkTracker.testPoweredLoaders(level, (loader) -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
@@ -76,7 +88,7 @@ public class ServerChunkCacheMixin {
             NaturalSpawner.spawnForChunk(
                     level,
                     levelChunk,
-                    this.lastSpawnState,
+                    state,
                     this.spawnFriendlies,
                     this.spawnEnemies,
                     flag
