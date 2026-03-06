@@ -37,7 +37,7 @@ public class Mannequins {
 
     public static final DeferredBlock<VillagerSkull> VILLAGER_SKULL = BLOCKS.register(
             "villager_skull",
-            () -> new VillagerSkull(BlockBehaviour.Properties.of())
+            () -> new VillagerSkull(BlockBehaviour.Properties.of().strength(1.0f))
     );
     public static final DeferredItem<BlockItem> VILLAGER_SKULL_ITEM = ITEMS.registerSimpleBlockItem(VILLAGER_SKULL);
     public static final SkullBlock.Type VILLAGER_SKULL_TYPE = new VillagerSkull.VillagerSkullType();
