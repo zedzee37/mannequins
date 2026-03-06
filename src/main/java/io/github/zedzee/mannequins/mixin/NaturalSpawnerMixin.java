@@ -1,6 +1,5 @@
 package io.github.zedzee.mannequins.mixin;
 
-import io.github.zedzee.mannequins.Mannequins;
 import io.github.zedzee.mannequins.chunk.ChunkTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -38,7 +37,7 @@ public abstract class NaturalSpawnerMixin {
         }
 
         double despawnDistance = mob.getType().getCategory().getDespawnDistance();
-        if (ChunkTracker.testPoweredLoaders(level, mob.getOnPos(), despawnDistance * despawnDistance)) {
+        if (ChunkTracker.testPoweredLoaders(level, mob.blockPosition(), despawnDistance * despawnDistance)) {
             return isValidPositionForMob(level, mob, 0);
         }
 
