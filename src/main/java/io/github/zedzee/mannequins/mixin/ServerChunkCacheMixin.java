@@ -1,6 +1,7 @@
 package io.github.zedzee.mannequins.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import io.github.zedzee.mannequins.Mannequins;
 import io.github.zedzee.mannequins.chunk.ChunkTracker;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.*;

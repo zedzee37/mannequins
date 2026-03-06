@@ -45,31 +45,6 @@ public class MannequinsEvents {
     }
 
     @SubscribeEvent
-    public static void onSpawnPositionCheck(MobSpawnEvent.PositionCheck event) {
-        ServerLevel serverLevel = event.getLevel().getLevel();
-
-        Entity entity = event.getEntity();
-        EntityType<?> entityType = entity.getType();
-        double despawnDistance = entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance();
-
-        ChunkTracker tracker = ChunkTracker.getFromLevel(serverLevel);
-        Set<BlockPos> loaders = tracker.getLoaders();
-        for (BlockPos loader : loaders) {
-            if (!VillagerSkull.isPowered(serverLevel, loader)) {
-                continue;
-            }
-
-            double distanceSquared = loader.distSqr(entity.getOnPos());
-            if (distanceSquared < despawnDistance) {
-                event.setResult(MobSpawnEvent.PositionCheck.Result.SUCCEED);
-                return;
-            }
-        }
-
-        event.setResult(MobSpawnEvent.PositionCheck.Result.DEFAULT);
-    }
-
-    @SubscribeEvent
     public static void onTryDespawn(MobDespawnEvent event) {
         ServerLevel serverLevel = event.getLevel().getLevel();
 
