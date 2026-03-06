@@ -71,7 +71,7 @@ public class LocalMobCapCalculatorMixin {
             }
 
             mannequins$loaderCountMap.computeIfAbsent(loader, l -> new LocalMobCapCalculator.MobCounts());
-            return true;
+            return false;
         });
     }
 }
