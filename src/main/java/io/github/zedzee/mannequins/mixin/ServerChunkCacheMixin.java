@@ -65,12 +65,12 @@ public class ServerChunkCacheMixin {
         }
 
         int x = SectionPos.sectionToBlockCoord(chunkPos.x);
-        int y = SectionPos.sectionToBlockCoord(chunkPos.z);
+        int z = SectionPos.sectionToBlockCoord(chunkPos.z);
 
         if (ChunkTracker.testPoweredLoaders(level, (loader) -> {
             int dx = loader.getX() - x;
-            int dy = loader.getY() - y;
-            int distanceSquared = (dx*dx) + (dy*dy);
+            int dz = loader.getZ() - z;
+            int distanceSquared = (dx*dx) + (dz*dz);
             return distanceSquared < MAX_DISTANCE;
         }) && this.lastSpawnState != null) {
             NaturalSpawner.spawnForChunk(
