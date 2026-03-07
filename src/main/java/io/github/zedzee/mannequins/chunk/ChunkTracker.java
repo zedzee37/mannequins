@@ -85,7 +85,7 @@ public class ChunkTracker extends SavedData {
         return testPoweredLoaders(level, (loader) -> loader.distSqr(pos) < maxDistance);
     }
 
-    public static boolean forEachPoweredLoader(ServerLevel level, Consumer<BlockPos> consumer) {
+    public static void forEachPoweredLoader(ServerLevel level, Consumer<BlockPos> consumer) {
         for (BlockPos loader : getFromLevel(level).getLoaders()) {
             if (VillagerSkull.isPowered(level, loader)) {
                 consumer.accept(loader);
