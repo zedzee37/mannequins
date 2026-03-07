@@ -72,13 +72,6 @@ public abstract class ServerChunkCacheMixin {
         int x = SectionPos.sectionToBlockCoord(chunkPos.x, 8);
         int z = SectionPos.sectionToBlockCoord(chunkPos.z, 8);
 
-        int l = this.distanceManager.getNaturalSpawnChunkCount();
-        NaturalSpawner.SpawnState state = NaturalSpawner.createState(
-                l,
-                this.level.getAllEntities(),
-                this::getFullChunk,
-                new LocalMobCapCalculator(this.chunkMap)
-        );
         if (ChunkTracker.testPoweredLoaders(level, (loader) -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
@@ -88,7 +81,7 @@ public abstract class ServerChunkCacheMixin {
             NaturalSpawner.spawnForChunk(
                     level,
                     levelChunk,
-                    state,
+                    this.lastSpawnState,
                     this.spawnFriendlies,
                     this.spawnEnemies,
                     flag
