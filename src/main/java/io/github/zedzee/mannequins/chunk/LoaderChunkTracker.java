@@ -16,11 +16,11 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-public class ChunkTracker extends SavedData {
+public class LoaderChunkTracker extends SavedData {
     public static final String DATA_STORAGE_KEY = "chunk_tracker";
-    public static final SavedData.Factory<ChunkTracker> FACTORY = new SavedData.Factory<>(
-            ChunkTracker::new,
-            ChunkTracker::load
+    public static final SavedData.Factory<LoaderChunkTracker> FACTORY = new SavedData.Factory<>(
+            LoaderChunkTracker::new,
+            LoaderChunkTracker::load
     );
 
     private static final String LOADERS_KEY = "chunks";
@@ -30,11 +30,11 @@ public class ChunkTracker extends SavedData {
 
     private final Set<BlockPos> loaders;
 
-    public ChunkTracker() {
+    public LoaderChunkTracker() {
         this.loaders = new HashSet<>();
     }
 
-    public ChunkTracker(Set<BlockPos> loaders) {
+    public LoaderChunkTracker(Set<BlockPos> loaders) {
         this.loaders = loaders;
     }
 
@@ -61,12 +61,12 @@ public class ChunkTracker extends SavedData {
     }
 
     public static void forceChunks(ServerLevel level) {
-        ChunkTracker tracker = getFromLevel(level);
+        LoaderChunkTracker tracker = getFromLevel(level);
         tracker.loaders.forEach(pos -> tracker.addLoader(level, pos));
     }
 
     public static boolean testPoweredLoaders(ServerLevel level, Predicate<BlockPos> comparison) {
-        ChunkTracker tracker = getFromLevel(level);
+        LoaderChunkTracker tracker = getFromLevel(level);
 
         for (BlockPos loader : tracker.getLoaders()) {
             if (!VillagerSkull.isPowered(level, loader)) {
@@ -109,9 +109,9 @@ public class ChunkTracker extends SavedData {
         return tag;
     }
 
-    public static ChunkTracker load(CompoundTag tag, HolderLookup.Provider provider) {
+    public static LoaderChunkTracker load(CompoundTag tag, HolderLookup.Provider provider) {
         if (!tag.contains(LOADERS_KEY)) {
-            return new ChunkTracker();
+            return new LoaderChunkTracker();
         }
 
         ListTag listTag = tag.getList(LOADERS_KEY, Tag.TAG_COMPOUND);
@@ -127,10 +127,10 @@ public class ChunkTracker extends SavedData {
             loaders.add(new BlockPos(x, y, z));
         }
 
-        return new ChunkTracker(loaders);
+        return new LoaderChunkTracker(loaders);
     }
 
-    public static ChunkTracker getFromLevel(ServerLevel level) {
+    public static LoaderChunkTracker getFromLevel(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(FACTORY, DATA_STORAGE_KEY);
     }
 }

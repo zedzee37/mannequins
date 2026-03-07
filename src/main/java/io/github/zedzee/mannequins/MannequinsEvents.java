@@ -1,7 +1,7 @@
 package io.github.zedzee.mannequins;
 
 import io.github.zedzee.mannequins.block.VillagerSkull;
-import io.github.zedzee.mannequins.chunk.ChunkTracker;
+import io.github.zedzee.mannequins.chunk.LoaderChunkTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -12,9 +12,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.world.chunk.RegisterTicketControllersEvent;
 import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
-import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.neoforge.event.entity.living.MobDespawnEvent;
-import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 
 import java.util.Set;
@@ -41,7 +39,7 @@ public class MannequinsEvents {
             return;
         }
 
-        ChunkTracker.forceChunks(serverLevel);
+        LoaderChunkTracker.forceChunks(serverLevel);
     }
 
     @SubscribeEvent
@@ -52,7 +50,7 @@ public class MannequinsEvents {
         EntityType<?> entityType = entity.getType();
         double despawnDistance = entityType.getCategory().getDespawnDistance() * entityType.getCategory().getDespawnDistance();
 
-        ChunkTracker tracker = ChunkTracker.getFromLevel(serverLevel);
+        LoaderChunkTracker tracker = LoaderChunkTracker.getFromLevel(serverLevel);
         Set<BlockPos> loaders = tracker.getLoaders();
         for (BlockPos loader : loaders) {
             if (!VillagerSkull.isPowered(serverLevel, loader)) {

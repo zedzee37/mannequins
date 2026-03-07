@@ -1,14 +1,18 @@
 package io.github.zedzee.mannequins.mixin;
 
-import io.github.zedzee.mannequins.chunk.ChunkTracker;
+import io.github.zedzee.mannequins.chunk.LoaderChunkTracker;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,7 +41,7 @@ public abstract class NaturalSpawnerMixin {
         }
 
         double despawnDistance = mob.getType().getCategory().getDespawnDistance();
-        if (ChunkTracker.loaderWithinDistance(level, mob.blockPosition(), despawnDistance * despawnDistance)) {
+        if (LoaderChunkTracker.loaderWithinDistance(level, mob.blockPosition(), despawnDistance * despawnDistance)) {
             return isValidPositionForMob(level, mob, 0);
         }
 
@@ -57,7 +61,7 @@ public abstract class NaturalSpawnerMixin {
                                     double distance) {
         boolean canSpawn = isValidSpawnPostitionForType(level, category, structureManager, generator, data, pos, distance);
         if (!canSpawn) {
-            if (ChunkTracker.loaderWithinDistance(
+            if (LoaderChunkTracker.loaderWithinDistance(
                     level, pos, category.getDespawnDistance() * category.getDespawnDistance()
             )) {
                 return isValidSpawnPostitionForType(level, category, structureManager, generator, data, pos, 0);

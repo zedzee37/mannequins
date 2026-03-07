@@ -1,7 +1,7 @@
 package io.github.zedzee.mannequins.block;
 
 import io.github.zedzee.mannequins.Mannequins;
-import io.github.zedzee.mannequins.chunk.ChunkTracker;
+import io.github.zedzee.mannequins.chunk.LoaderChunkTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -24,7 +24,7 @@ public class VillagerSkull extends SkullBlock {
 
         if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
 
-        ChunkTracker tracker = ChunkTracker.getFromLevel(serverLevel);
+        LoaderChunkTracker tracker = LoaderChunkTracker.getFromLevel(serverLevel);
         tracker.addLoader(serverLevel, pos);
     }
 
@@ -38,7 +38,7 @@ public class VillagerSkull extends SkullBlock {
 
         if (level.isClientSide || !(level instanceof ServerLevel serverLevel)) return;
 
-        ChunkTracker tracker = ChunkTracker.getFromLevel(serverLevel);
+        LoaderChunkTracker tracker = LoaderChunkTracker.getFromLevel(serverLevel);
         tracker.removeLoader(serverLevel, pos);
     }
 

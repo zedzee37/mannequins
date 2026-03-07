@@ -1,11 +1,10 @@
 package io.github.zedzee.mannequins.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import io.github.zedzee.mannequins.chunk.ChunkTracker;
+import io.github.zedzee.mannequins.chunk.LoaderChunkTracker;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.*;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LocalMobCapCalculator;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.asm.mixin.Final;
@@ -72,7 +71,7 @@ public abstract class ServerChunkCacheMixin {
         int x = SectionPos.sectionToBlockCoord(chunkPos.x, 8);
         int z = SectionPos.sectionToBlockCoord(chunkPos.z, 8);
 
-        if (ChunkTracker.testPoweredLoaders(level, (loader) -> {
+        if (LoaderChunkTracker.testPoweredLoaders(level, (loader) -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
             int distanceSquared = (dx*dx) + (dz*dz);

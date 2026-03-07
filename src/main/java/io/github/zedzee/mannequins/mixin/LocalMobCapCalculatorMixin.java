@@ -1,6 +1,6 @@
 package io.github.zedzee.mannequins.mixin;
 
-import io.github.zedzee.mannequins.chunk.ChunkTracker;
+import io.github.zedzee.mannequins.chunk.LoaderChunkTracker;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ChunkMap;
@@ -40,7 +40,7 @@ public class LocalMobCapCalculatorMixin {
         int x = SectionPos.sectionToBlockCoord(pos.x, 8);
         int z = SectionPos.sectionToBlockCoord(pos.z, 8);
 
-        if (ChunkTracker.testPoweredLoaders(chunkMap.level, (loader) -> {
+        if (LoaderChunkTracker.testPoweredLoaders(chunkMap.level, (loader) -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
             int distance = dx*dx + dz*dz;
@@ -61,7 +61,7 @@ public class LocalMobCapCalculatorMixin {
         int x = SectionPos.sectionToBlockCoord(pos.x, 8);
         int z = SectionPos.sectionToBlockCoord(pos.z, 8);
 
-        ChunkTracker.forEachPoweredLoader(chunkMap.level, loader -> {
+        LoaderChunkTracker.forEachPoweredLoader(chunkMap.level, loader -> {
             int dx = loader.getX() - x;
             int dz = loader.getZ() - z;
             int distance = dx*dx + dz*dz;
