@@ -2,7 +2,7 @@ package io.github.zedzee.mannequins.mixin.client;
 
 import com.google.common.collect.ImmutableMap;
 import com.llamalad7.mixinextras.sugar.Local;
-import io.github.zedzee.mannequins.Mannequins;
+import io.github.zedzee.mannequins.MannequinsClient;
 import io.github.zedzee.mannequins.model.VillagerSkullModel;
 import net.minecraft.client.model.geom.LayerDefinitions;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -24,6 +24,6 @@ public class LayerDefinitionsMixin {
                 VillagerSkullModel.createHeadModel(),
                 64,
                 64);
-        builder.put(Mannequins.VILLAGER_SKULL_LAYER, villagerHeadDefinition);
+        builder.put(MannequinsClient.VILLAGER_SKULL_LAYER, villagerHeadDefinition);
     }
 }

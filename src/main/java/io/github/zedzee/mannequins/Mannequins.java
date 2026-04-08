@@ -41,8 +41,6 @@ public class Mannequins {
     );
     public static final DeferredItem<BlockItem> VILLAGER_SKULL_ITEM = ITEMS.registerSimpleBlockItem(VILLAGER_SKULL);
     public static final SkullBlock.Type VILLAGER_SKULL_TYPE = new VillagerSkull.VillagerSkullType();
-    public static final ModelLayerLocation VILLAGER_SKULL_LAYER =
-            new ModelLayerLocation(resourceLocation("villager_head"), "main");
     public static final TicketController TICKET_CONTROLLER = new TicketController(resourceLocation("ticket_controller"));
 
     public Mannequins(IEventBus modEventBus, ModContainer modContainer) {

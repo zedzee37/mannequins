@@ -3,6 +3,7 @@ package io.github.zedzee.mannequins.mixin.client;
 import com.google.common.collect.ImmutableMap;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.zedzee.mannequins.Mannequins;
+import io.github.zedzee.mannequins.MannequinsClient;
 import io.github.zedzee.mannequins.model.VillagerSkullModel;
 import net.minecraft.client.model.SkullModelBase;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -35,7 +36,7 @@ public class SkullBlockRendererMixin {
     private static void addVillagerSkullRenderer(EntityModelSet entityModelSet,
                                                  CallbackInfoReturnable<Map<SkullBlock.Type, SkullModelBase>> cir,
                                                  @Local() ImmutableMap.Builder<SkullBlock.Type, SkullModelBase> builder) {
-        builder.put(Mannequins.VILLAGER_SKULL_TYPE, new VillagerSkullModel(entityModelSet.bakeLayer(Mannequins.VILLAGER_SKULL_LAYER)));
+        builder.put(Mannequins.VILLAGER_SKULL_TYPE, new VillagerSkullModel(entityModelSet.bakeLayer(MannequinsClient.VILLAGER_SKULL_LAYER)));
     }
 
     @Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
